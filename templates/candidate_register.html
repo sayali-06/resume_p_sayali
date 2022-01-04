@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% block title %}
+Candidate login
+    {% endblock title %}
+{% block body %}
+
+<div class="container " >
+    <div class="row">
+      <div class="col-md-7">
+        <h1 class="text-light display-5 mt-100" style="font-size: 80px;">Welcome to signup </h1>
+      </div>
+      <div class="col-md-4 mt-50">
+        <div class="card " style="width: 550px;">
+          <div class="card-body">
+            <h1 class="display-4   mb-0 " style="letter-spacing: 1px;">Sign Up</h1>
+            <p class=" fw-normal mb-2 pb-2 mt-2" >If u already have an account, then please <a href="/candidate_login" class="link" style="font-size: 1.2em;" >Log in</a> first</p>
+            <form class="form" method="POST" action="/candidate_register" enctype="='multipart/form-data">
+              <!-- username input -->
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-outline mb-4">
+                   <label class="form-label" for="form2Example1">Name</label>
+                     <input type="text" id="form2Example1" class="form-control" name="name" placeholder="Full name"/>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-outline mb-4">
+                   <label class="form-label" for="form2Example1">Username</label>
+                   <input type="text" id="form2Example1" class="form-control" name="username" placeholder="Username"/>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-6">
+                   <div class="form-outline mb-4  ">
+                     <label class="form-label" for="birthdayDate">DOB</label>
+                      <input type="date" id="birthdayDate" class="form-control " name="const {propertyName} = objectToDestruct;" placeholder="Full name"/>
+                   </div>
+                  </div>
+               <div class="col-md-6">
+                 <div class="form-outline mb-4">
+                  
+                <label class="form-label" for="form2Example1">Phone number</label>
+                <input type="tel" id="form2Example1" class="form-control" name="phoneno" placeholder="Phone number"/>
+              </div>
+            </div>
+        </div>
+              <!-- <div class="form-outline mb-4">
+                <label class="form-label" for="form2Example1">Address</label>
+                <input type="text" id="form2Example1" class="form-control" name="email" placeholder="Address"/>
+              </div> -->
+             
+              <div class="form-outline mb-4">
+                <label class="form-label" for="form2Example2">Password</label>
+                <input type="password" id="form2Example2" class="form-control" name="password" placeholder="Password" />
+              </div>
+  
+              <!-- Password input -->
+              <div class="form-outline mb-4">
+                <label class="form-label" for="form2Example2">Confirm Password</label>
+                <input type="password" id="form2Example2" class="form-control" name="password" placeholder="Confirm Password" />
+              </div>
+  
+  
+              <!-- Submit button -->
+             
+              <input type="submit" role="button" value="Sign Up" class="btn btn-primary btn-block"></input>
+  
+              <!-- Register buttons -->
+              <!-- <div class="text-center">
+                <p>Not a member? <a href="/register">Register</a></p>
+              </div> -->
+            </form>
+          </div>
+        </div>
+      </div>
+  
+    </div>
+  </div>
+{% endblock body %}

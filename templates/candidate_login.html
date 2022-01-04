@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block title %}
+Candidate login
+    {% endblock title %}
+{% block body %}
+
+<div class="container " >
+    <div class="row">
+      <div class="col-md-7">
+        <h1 class="text-light display-5 mt-100" style="font-size: 80px;">Welcome to login </h1>
+      </div>
+      <div class="col-md-4 mt-100">
+        <div class="card ">
+          <div class="card-body">
+            <h1 class="display-4   mb-0 " style="letter-spacing: 1px;">Sign In</h1>
+            <p class=" fw-normal mb-2 pb-2 mt-2" >If u have not created an account yet, then please <a href="cand_register" class="link" style="font-size: 1.2em;" >Sign up</a> first</p>
+            <form class="form" method="POST" name="form" action="/candidate_login">
+              <!-- username input -->
+              <div class="form-outline mb-4">
+                <label class="form-label" for="form2Example1">Username</label>
+                <input type="text" id="form2Example1" class="form-control" name="username" placeholder="Username"/>
+              </div>
+  
+              <!-- Password input -->
+              <div class="form-outline mb-4">
+                <label class="form-label" for="form2Example2">Password</label>
+                <input type="password" id="form2Example2" class="form-control" name="password" placeholder="Password" />
+              </div>
+  
+              <!-- 2 column grid layout for inline styling -->
+              <div class="row mb-4"> 
+                <div class="col d-flex justify-content-center">
+                  <!-- Checkbox -->
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="" id="form2Example34" checked />
+                    <label class="form-check-label" for="form2Example34"> Remember me </label>
+                  </div>
+                </div>
+  
+                <div class="col">
+                  <!-- Simple link -->
+                  <a href="#!">Forgot password?</a>
+                </div>
+              </div>
+  
+              <!-- Submit button -->
+             
+              <input type="submit" role="button" value="Log In"  class="btn btn-primary btn-block mb-4"></input>
+  
+              <!-- Register buttons -->
+              <!-- <div class="text-center">
+                <p>Not a member? <a href="/register">Register</a></p>
+              </div> -->
+            </form>
+          </div>
+        </div>
+      </div>
+  
+    </div>
+  </div>
+{% endblock body %}
