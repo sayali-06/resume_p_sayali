@@ -1,12 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}
+Resume Parsing
+    {% endblock title %}
+{% block body %}
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8">
-    <title>Python Flask MongoDB Upload File and validate before save to Database</title>
+    <title>Upload Your Resume Here </title>
   </head>
   <body>
-  <h2>Python Flask MongoDB Upload File and validate before save to Database </h2>
-  <h3>Select a file to upload</h3>
+  <h3 class="text-light display-5 "><br>Upload Your Resume Here<br> </h3>
+  
         <p>
          {% with messages = get_flashed_messages() %}
            {% if messages %}
@@ -19,9 +24,8 @@
          {% endwith %}
         </p>
 <form method="post" action="/upload" enctype="multipart/form-data">
- <p>Name : <input type="text" name="txtusername" value="" placeholder="User Name" required> </p>
- <p>Email : <input type="email" name="inputEmail" placeholder="Email address" required></p>
-  <p>
+ 
+
    <input type="file" name="inputFile" autocomplete="off" required onchange="loadFile(event)">
   </p>
     <p>
@@ -29,15 +33,7 @@
  </p>
 </form>
 <img id="output" width="500"/>
-<script>
-  var loadFile = function(event) {
-    var output = document.getElementById('output');
-    output.src = URL.createObjectURL(event.target.files[0]);
-    output.onload = function() {
-      URL.revokeObjectURL(output.src) 
-    }
-  };
-</script>
+
  
 <style>
 .alert-primary {
@@ -55,3 +51,4 @@
 </style>
     </body>
 </html>
+{% endblock body %}

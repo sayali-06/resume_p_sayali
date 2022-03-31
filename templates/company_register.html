@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block title %}
-Candidate login
+Company Register
     {% endblock title %}
 {% block body %}
 
@@ -63,7 +63,7 @@ Candidate login
   
               <!-- Submit button -->
              
-              <input type="submit" role="button" value="Sign Up" class="btn btn-primary btn-block"></input>
+              <input type="submit" role="button" onclick="myRegistration()" value="Sign Up" class="btn btn-primary btn-block"></input>
   
               <!-- Register buttons -->
               <!-- <div class="text-center">
@@ -76,4 +76,11 @@ Candidate login
   
     </div>
   </div>
+  <script>
+    function myRegistration() {
+      alert("Registration successful");
+    }
+    </script>
 {% endblock body %}
+
+

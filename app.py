@@ -1,5 +1,5 @@
 #importing libraries
-from flask import Flask, render_template, session, request, redirect, flash
+from flask import Flask, render_template, session, request, redirect, flash, jsonify
 from flask.helpers import url_for
 from flask.wrappers import Request
 from flask_login.utils import logout_user
@@ -11,15 +11,30 @@ from flask_mongoengine import MongoEngine
 from werkzeug.utils import secure_filename
 import os, textract,docx2txt
 from pdfminer.high_level import extract_text
-import nltk, re
+from nltk.corpus import stopwords
+from asyncio.windows_events import NULL
+import requests
+import json
+import numpy as np
+import pandas as pd
+from pandas import json_normalize # easy JSON -> pd.DataFrame
+import re
+import json
+from resuumes import extract_name
+from resumeskill import extract_skills
+from education2 import extract_education
+
+
+
 
 
 #intialize app
-app= Flask(__name__, template_folder='templates')
+app= Flask(__name__, template_folder='templates') 
+
+#connecting with mongo
 app.config['MONGO_DBNAME'] = 'resume'
 app.config['MONGO_URI'] = 'mongodb://localhost:27017/resume'
 app.secret_key = 'sayali'
-
 mongo = PyMongo(app)
 
 db = MongoEngine()
@@ -30,20 +45,25 @@ UPLOAD_FOLDER = ''
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
-ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif','html','docx'])
 
-nltk.download('punkt')
-nltk.download('averaged_perceptron_tagger')
-nltk.download('maxent_ne_chunker')
-nltk.download('words')
+ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg','html','docx','doc'])
+
+# Grad all general stop words
+STOPWORDS = set(stopwords.words('english'))
+EDUCATION = [
+            'BE','B.E.', 'B.E', 'BS', 'B.S', 'B.COM','BAS','B.Arch.','BA','BFA'
+            'ME', 'M.E', 'M.E.', 'M.S','Masters' ,'MBA','MFA','M.Ed.','MPA','MPH','MSW','M.Pub.',
+            'BTECH', 'B.TECH', 'M.TECH', 'MTECH', 
+            'SSC', 'HSC', 'CBSE', 'ICSE', 'X', 'XII','B.Ed','AAS','AA','AS'
+        ]
 
 def allowed_file(filename):
  return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
    
-class User(db.Document):
-    name = db.StringField()
-    email = db.StringField()
-    profile_pic = db.StringField()
+#class User(db.Document):
+ #   name = db.StringField()
+  #  email = db.StringField()
+   # profile_pic = db.StringField()
 
 @app.route('/')
 def home():
@@ -67,6 +87,7 @@ def candidate():
         login_user = user.find_one({'username':request.form['username']})
         if login_user:
             if bcrypt.hashpw(request.form['password'].encode('utf-8'),login_user['password']) == login_user['password']:
+                print("pass: ",bcrypt.hashpw(request.form['password'].encode('utf-8'),bcrypt.gensalt()))
                 session['username'] = request.form['username']
                 return render_template('upload.html')
             return 'invalid password'
@@ -82,7 +103,8 @@ def compcandidate():
         if login_user:
             if bcrypt.hashpw(request.form['password'].encode('utf-8'),login_user['password']) == login_user['password']:
                 session['username'] = request.form['username']
-                return render_template('upload.html')
+
+                return render_template('company_homee.html')
             return 'invalid password'
         return 'signup first'   
     return render_template('company_login.html')
@@ -111,7 +133,7 @@ def register():
             session['username'] = request.form['username']
         else:
             return 'username already exists'
-    return 'sign up completed, now login'
+    return redirect(url_for('candidate'))
 
 #company register
 @app.route('/company_register', methods=['POST'])
@@ -125,7 +147,7 @@ def compregister():
             session['username'] = request.form['username']
         else:
             return 'username already exists'
-    return 'success'
+    return redirect(url_for('compcandidate'))
 
 
 #signout
@@ -134,73 +156,124 @@ def signout():
     session.pop('username', None)
     return redirect(url_for('home'))
 
+@login_required
 #file uploading
 @app.route('/upload', methods=['POST'])
 def upload():
     file = request.files['inputFile']
-    
-    rs_username = request.form['txtusername']
-    inputEmail = request.form['inputEmail']
+     
     filename = secure_filename(file.filename)
     
     #to find path of a file
     path = os.path.abspath(filename)
-    print(path)
+    print("file is",path)
 
-   
-   
     #saving file in database
     if file and allowed_file(file.filename):
         print('success file')
 
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        usersave = User(name=rs_username, email=inputEmail, profile_pic=file.filename)
-        usersave.save()
+        #usersave = User(name=rs_username, email=inputEmail, profile_pic=file.filename)
+        #usersave.save()
+
 
         #to check file extension and to convert it into text
         ext = os.path.splitext(filename)[-1].lower()
         if ext == ".docx":
-            print( "is an docx")
             txt = docx2txt.process(path)
-            print(txt.replace('\n',' '))
+            
+
+            print    
         elif ext == ".pdf":
-            print ( "is a pdf")
+            print ( " This is pdf file")
             txt = extract_text(path)
-        else:
+            
+          
+            
+        elif ext == ".html":
             txt = textract.process(path)
+            print ("This is a html file")
+
+        else:
+            print("This file type is not supported")
+
         
-            print ("is an html")
+            
 
-        person_names = []
-        for sent in nltk.sent_tokenize(txt):
-            for chunk in nltk.ne_chunk(nltk.pos_tag(nltk.word_tokenize(sent))):
-                if hasattr(chunk, 'label') and chunk.label() == 'PERSON':
-                    person_names.append(''.join(chunk_leave[0] for chunk_leave in chunk.leaves()))
-        print(" person names in resume\n",person_names)
+        print(txt.replace('\n',' '))
 
+        print()
+        print("SUMMARY OF RESUME")
+        names = extract_name(txt)
+        print('Name of candidate: ',names)
+
+        print()
+        skill = extract_skills(txt)
+        print('Skills of candidate: ', skill)
+
+        print()
+        
         PHONE_REG = re.compile(r'[\+\(]?[1-9][0-9 .\-\(\)]{8,}[0-9]')
         phone = re.findall(PHONE_REG, txt)
         if phone:
             number = ''.join(phone[0])
-
-        if txt.find(number) >=0 and len(number) <16:
-            print("phone no:\t",number)
+        try:
+            if txt.find(number) >=0 and len(number) <16:
+                print("Phone no of candidate:\t",number)
+        except:
+            print("no number")
 
         EMAIL_REG = re.compile(r'[a-z0-9\.\-+_]+@[a-z0-9\. \-+_]+\.[a-z]+')
 
         emails = re.findall(EMAIL_REG, txt)
         if emails:
-            print("email of candidate:\t",emails[0])
+            print("Email Id of candidate:\t",emails[0])
+
+        education = extract_education(txt)
+        print('Education of candidate',education)
 
         mongo.save_file(file.filename,file)
-        mongo.db.candidate.insert({'username':rs_username,'file_name':filename})
-        flash('File successfully uploaded ' + file.filename + ' to the database!')
+   
+        username = session['username']
+        login_user = mongo.db.candidate.find_one({'username':username})
+        
+        user =mongo.db.candidate
+        user.update({'username' : username}, {'name':login_user['name'],'username':login_user['username'], 'dob':login_user['dob'],'phoneno':login_user['phoneno'],'password':login_user['password'],'skills':skill,'file_name':filename ,'education':education})
+
+
+        #mongo.db.candidate.insert({'file_name':filename})
+       # flash('File successfully uploaded ' + file.filename + ' to the database!')
      
         return render_template('/home2.html') 
     else:
        flash('Invalid Upload only txt, pdf, png, jpg, jpeg, gif,html,docx') 
     return redirect('/') 
- 
 
-if (__name__ == '__main__'):
+
+
+@app.route('/test', methods=['POST','GET'])
+def output():
+    if request.method == 'POST':
+        output = request.get_json()
+        print(output) # This is the output that was stored in the JSON within the browser
+       
+        result = json.loads(output) #this converts the json output to a python dictionary
+        print(result) # Printing the new dictionary
+        print(type(result))#this shows the json converted as a python dictionary
+        user =mongo.db.company
+        username = session['username']
+        
+        canduser =mongo.db.candidate
+        
+        login_user = user.find_one({'username':username})
+        user.update({'username' : username}, {'name':login_user['name'],'username':login_user['username'], 'dob':login_user['dob'],'phoneno':login_user['phoneno'],'password':login_user['password'],'req_skills':output},upsert=True)
+        summary = canduser.find({'skills':'R'})
+        print(summary)
+        return jsonify('',render_template('testing.html',summary=summary))
+        # for data in summary:
+        # #     print(data)
+        
+   
+ 
+if __name__ == '__main__':
     app.run(debug=True)
